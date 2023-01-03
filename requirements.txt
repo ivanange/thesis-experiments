@@ -46,7 +46,7 @@ munkres==1.1.4
 nest-asyncio==1.5.5
 networkx==2.8.4
 numexpr==2.8.4
-numpy==1.23.4
+# numpy==1.23.4
 osqp==0.6.2.post5
 packaging==22.0
 pandas==1.5.2
