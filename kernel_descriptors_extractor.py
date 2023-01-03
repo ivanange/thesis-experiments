@@ -135,34 +135,10 @@ class KernelDescriptorsExtractor:
         nX, nY, nchannels = I.shape
 
         # precalculate magnitude and angle of gradient in each pixel
-        s_z = generic_filter(I, numpy.nanstd, size=(3, 3, 3),
+        s_z = generic_filter(I, numpy.nanstd, size=3,
                              mode='constant', cval=numpy.nan)
-        b = reduce(lambda c, rest: np.append(rest, generic_filter(I[:, :, c], lambda grid: (grid > numpy.nanmedian(
-            grid)).astype('int')), size=(3, 3, 3), mode='constant', cval=numpy.nan), [])
-        Ig_angle = numpy.zeros(I.shape[0:2])
-        for i in range(nX):
-            for j in range(nY):
-                chosen_dx, chosen_dy, chosen_magnitude = 0, 0, 0
-
-                for c in range(nchannels):
-                    dx, dy = 0, 0
-                    if i < nX - 1:
-                        dx += I[i + 1, j, c]
-                    if i > 0:
-                        dx -= I[i - 1, j, c]
-                    if j < nY - 1:
-                        dy += I[i, j + 1, c]
-                    if j > 0:
-                        dy -= I[i, j - 1, c]
-                    magnitude = dx ** 2 + dy ** 2
-
-                    if magnitude > chosen_magnitude:
-                        chosen_magnitude = magnitude
-                        chosen_dx = dx
-                        chosen_dy = dy
-
-                Ig_magnitude[i, j] = numpy.sqrt(magnitude)
-                Ig_angle[i, j] = numpy.arctan2(dx, dy)
+        b = reduce(lambda c, rest: numpy.append(rest, generic_filter(I[:, :, c], lambda grid: (grid > numpy.nanmedian(
+            grid)).astype('int')), size=3, mode='constant', cval=numpy.nan), [])
 
         x_step = 1.0 / (patch_size[0] - 1)
         y_step = 1.0 / (patch_size[1] - 1)
@@ -179,17 +155,17 @@ class KernelDescriptorsExtractor:
         for sx in range(0, nX - patch_size[0] + 1, subsample[0]):
             for sy in range(0, nY - patch_size[1] + 1, subsample[1]):
                 norm = numpy.sum(
-                    Ig_magnitude[sx:sx + patch_size[0], sy:sy + patch_size[1]] ** 2)
-                norm = numpy.sqrt(self.epsilon_g + norm)
+                    s_z[sx:sx + patch_size[0], sy:sy + patch_size[1]] ** 2)
+                norm = numpy.sqrt(self.epsilon_s + norm)
 
-                X_o = Ig_angle[sx:sx + patch_size[0],
-                               sy:sy + patch_size[1]].reshape(-1)
-                X_o = X_o[:, numpy.newaxis]
-                X_o = self.projector_o.predict(X_o)
+                X_b = b[sx:sx + patch_size[0],
+                        sy:sy + patch_size[1]].reshape(-1)
+                X_b = X_b[:, numpy.newaxis]
+                X_b = self.projector_b.predict(X_b)
 
                 aux = numpy.zeros(kdes_dims)
-                for x_o, x_p, x, y in zip(X_o, X_p, patch_x, patch_y):
-                    aux += Ig_magnitude[x, y] * numpy.kron(x_o, x_p)
+                for x_b, x_p, x, y in zip(X_b, X_p, patch_x, patch_y):
+                    aux += s_z[x, y] * numpy.kron(x_b, x_p)
                 ret = numpy.append(ret, [aux / norm], axis=0)
                 pos += 1
 
@@ -234,6 +210,7 @@ class KernelDescriptorsExtractor:
         X_grad = []
         X_color = []
         X_shape = []
+
         if match_kernel == 'gradient' or match_kernel == 'all':
             for i in tqdm(list(range(n))):
                 X_grad.append(self._calc_gradient_match_kernel_for_image(

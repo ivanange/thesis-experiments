@@ -10,6 +10,7 @@ from sksurv.datasets import load_veterans_lung_cancer
 from sksurv.metrics import concordance_index_censored
 import pickle
 from datetime import datetime
+import describe
 
 
 def gramMatrix(X1, X2, K_function):

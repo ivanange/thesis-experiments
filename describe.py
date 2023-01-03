@@ -1,3 +1,4 @@
+from mando import command, main
 import os
 import numpy as np
 import pandas as pd
@@ -19,45 +20,54 @@ np.random.seed(0)
 # create transformations with different values of scale: 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, rotation: 30, 60, 90, 150, 180, 270, translation: (10,0), (20, 40), (40, 80), (80, 160), (-10, 10), (-20, -40), (-40, -80), (-80, -160), shear: 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5
 transform_combinations = [
     {},
-    {'scale': 0.25},
-    {'scale': 0.5},
-    {'scale': 2},
-    {'scale': 2.5},
-    {'rotation': 60},
-    {'rotation': 90},
-    {'rotation': 150},
-    {'rotation': 180},
-    {'scale': 0.25, 'rotation': 90},
-    {'scale': 0.25, 'rotation': 150},
-    {'scale': 0.25, 'rotation': 180},
-    {'scale': 2, 'rotation': 90},
-    {'scale': 2, 'rotation': 150},
-    {'scale': 2, 'rotation': 180},
+    # {'scale': 0.25},
+    # {'scale': 0.5},
+    # {'scale': 2},
+    # {'scale': 2.5},
+    # {'rotation': 60},
+    # {'rotation': 90},
+    # {'rotation': 150},
+    # {'rotation': 180},
+    # {'scale': 0.25, 'rotation': 90},
+    # {'scale': 0.25, 'rotation': 150},
+    # {'scale': 0.25, 'rotation': 180},
+    # {'scale': 2, 'rotation': 90},
+    # {'scale': 2, 'rotation': 150},
+    # {'scale': 2, 'rotation': 180},
 
 ]
 
-# initialize descriptors
-# KDESAExtractor = KernelDescriptorsExtractor()
-SIFTExtractor = SIFT()
-descriptor_names = {
-    'SIFT': lambda image: ([SIFTExtractor.detect_and_extract(image), np.array(SIFTExtractor.descriptors).flatten()])[1],
-    # 'HOG': lambda image: hog(image, feature_vector=True, channel_axis=2),
-    # 'KDESA': lambda image: KDESAExtractor.predict(np.array([image]))[0]
-}
+# descriptor_names = {
+#     'SIFT': lambda image: ([SIFTExtractor.detect_and_extract(image), np.array(SIFTExtractor.descriptors).flatten()])[1],
+#     'HOG': lambda image: hog(image, feature_vector=True, channel_axis=2),
+#     'KDESA': lambda image: KDESAExtractor.predict(np.array([image]))[0]
+# }
 
-#   for each image transform combination
-#       for each descriptor
-#           create empty features array of size (n_images)
-#           for each image
-#               apply image transform combination
-#               extract features, remember max_feature_size
-#           for each row in features
-#               pad features to max_feature_size
-#           concatenate features to dataset
-#       save dataset to file as transform_combination_descriptor.csv
 
-# for each descriptor
-for (descriptor_name, descriptor) in descriptor_names.items():
+@command
+def describe(descriptor):
+    '''extract features using the precised descriptor'''
+    descriptor_name = descriptor.upper()
+    if descriptor_name == 'KDESA':
+        KDESAExtractor = KernelDescriptorsExtractor()
+
+        def descriptor(image): return KDESAExtractor.predict(
+            np.array([image]))[0]
+
+    elif descriptor_name == 'SIFT':
+        SIFTExtractor = SIFT()
+
+        def descriptor(image): return ([SIFTExtractor.detect_and_extract(
+            image), np.array(SIFTExtractor.descriptors).flatten()])[1]
+
+    elif descriptor_name == 'HOG':
+        def descriptor(image): return hog(
+            image, feature_vector=True, channel_axis=2)
+
+    else:
+        Exception(f'Unknown descriptor {descriptor_name}')
+
+    print(f'Using {descriptor_name} descriptor')
 
     max_full_feature_size = 0
     full_features = list()
@@ -80,9 +90,10 @@ for (descriptor_name, descriptor) in descriptor_names.items():
                         **transform_combination).inverse)
 
                     # convert image to grayscale if not using kernel descriptors
-                    image = exposure.adjust_gamma(image, 2)
                     if descriptor_name == 'SIFT':
                         image = rgb2gray(image)
+
+                    image = exposure.adjust_gamma(image, 2)
 
                     # extract features, remember max_feature_size
                     feature = descriptor(image)

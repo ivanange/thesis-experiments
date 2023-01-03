@@ -1,3 +1,12 @@
 {
-  "cSpell.words": ["asarray", "KDESA", "keypoints", "ndimage", "scipy", "tqdm"]
+  "cSpell.words": [
+    "asarray",
+    "KDESA",
+    "keypoints",
+    "nanstd",
+    "nchannels",
+    "ndimage",
+    "scipy",
+    "tqdm"
+  ]
 }
