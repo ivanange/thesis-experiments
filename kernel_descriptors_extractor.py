@@ -57,7 +57,7 @@ class KernelDescriptorsExtractor:
         for i, (x, y) in enumerate(zip(X_o, X_p)):
             X_op[i, :] = numpy.kron(x, y)
         self.kpca_op = KernelPCA(kpca_kernel)
-        self.kpca_op.fit(X_op)
+        # self.kpca_op.fit(X_op)
 
         kdes_dim = self.projector_c.ndim * self.projector_p.ndim
         X_c = self.projector_c.predict(self.projector_c.basis)
@@ -68,6 +68,17 @@ class KernelDescriptorsExtractor:
                 X_cp[pos, :] = numpy.kron(x, y)
                 pos += 1
         self.kpca_cp = KernelPCA(kpca_kernel)
+        # self.kpca_cp.fit(X_cp)
+
+        kdes_dim = self.projector_b.ndim * self.projector_p.ndim
+        X_b = self.projector_b.predict(self.projector_b.basis)
+        X_bp = numpy.zeros((kdes_dim, kdes_dim))
+        pos = 0
+        for x in X_b:
+            for y in X_p:
+                X_bp[pos, :] = numpy.kron(x, y)
+                pos += 1
+        self.kpca_bp = KernelPCA(kpca_kernel)
         self.kpca_cp.fit(X_cp)
 
     def _calc_gradient_match_kernel_for_image(self, I, patch_size, subsample):
@@ -138,7 +149,7 @@ class KernelDescriptorsExtractor:
         s_z = generic_filter(I, numpy.nanstd, size=3,
                              mode='constant', cval=numpy.nan)
         b = reduce(lambda c, rest: numpy.append(rest, generic_filter(I[:, :, c], lambda grid: (grid > numpy.nanmedian(
-            grid)).astype('int')), size=3, mode='constant', cval=numpy.nan), [])
+            grid)).astype('int')), size=3, mode='constant', cval=numpy.nan), [0, 1, 2], [])
 
         x_step = 1.0 / (patch_size[0] - 1)
         y_step = 1.0 / (patch_size[1] - 1)
@@ -200,9 +211,9 @@ class KernelDescriptorsExtractor:
                 ret = numpy.append(ret, [aux], axis=0)
                 pos += 1
 
-        return self.kpca_cp.predict(ret, components=200).flatten()
+        return self.kpca_bp.predict(ret, components=200).flatten()
 
-    def predict(self, X, patch_size=(16, 16), subsample=(8, 8), match_kernel='all'):
+    def predict(self, X, patch_size=(16, 16), subsample=(8, 8), match_kernel='shape'):
         assert X.ndim == 4
         n = X.shape[0]
         print("Match kernel: %s" % match_kernel)

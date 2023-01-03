@@ -1,8 +1,11 @@
 {
   "cSpell.words": [
     "asarray",
+    "kdes",
     "KDESA",
     "keypoints",
+    "kpca",
+    "kron",
     "nanstd",
     "nchannels",
     "ndimage",
