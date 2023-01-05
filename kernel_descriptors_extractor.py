@@ -148,8 +148,8 @@ class KernelDescriptorsExtractor:
         # precalculate magnitude and angle of gradient in each pixel
         s_z = generic_filter(I, numpy.nanstd, size=3,
                              mode='constant', cval=numpy.nan)
-        b = reduce(lambda c, rest: numpy.append(rest, generic_filter(I[:, :, c], lambda grid: (grid > numpy.nanmedian(
-            grid)).astype('int')), size=3, mode='constant', cval=numpy.nan), [0, 1, 2], [])
+        b = reduce(lambda c, rest: numpy.append(rest, generic_filter(I[:, :, c], lambda grid: numpy.where(grid >= numpy.nanmedian(
+            grid), 1, 0), size=3, mode='constant', cval=numpy.nan)), [0, 1, 2], [])
 
         x_step = 1.0 / (patch_size[0] - 1)
         y_step = 1.0 / (patch_size[1] - 1)
