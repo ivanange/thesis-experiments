@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Mar  1 21:58:52 2017
-
-@author: Evariste
-"""
 
 if __name__ == "__main__":
     
