@@ -11,8 +11,8 @@ __pycache__/
 *.npy
 
 *.numbers
-*.pkl
-*.jpg
+#*.pkl
+#*.jpg
 
 # *.ipynb
 keep.git
