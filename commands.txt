@@ -1,0 +1,6 @@
+python experimenter.py describe hog dataset_reduced.csv > result_hog_reduced.txt
+python experimenter.py describe hog dataset_normal.csv > result_hog_normal.txt
+python experimenter.py describe sift dataset_reduced.csv > result_sift_reduced.txt
+python experimenter.py describe sift dataset_normal.csv > result_sift_normal.txt
+python experimenter.py describe kdesa dataset_reduced.csv > result_kdesa_reduced.txt
+python experimenter.py describe kdesa dataset_normal.csv > result_kdesa_normal.txt

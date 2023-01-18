@@ -235,7 +235,7 @@ class KernelDescriptorsExtractor:
 
         return self.kpca_cp.predict(ret, components=200).flatten()
 
-    def predict(self, X, patch_size=(16, 16), subsample=(8, 8), match_kernel='shape'):
+    def predict(self, X, patch_size=(64, 64), subsample=(32, 32), match_kernel='shape'):
         assert X.ndim == 4
         n = X.shape[0]
         print("Match kernel: %s" % match_kernel)
@@ -251,20 +251,20 @@ class KernelDescriptorsExtractor:
                     X[i, :, :, :], patch_size, subsample))
             X_grad = numpy.array(X_grad)
             # return X_grad
-        elif match_kernel == 'color' or match_kernel == 'all':
+        if match_kernel == 'color' or match_kernel == 'all':
             X_color = []
             for i in tqdm(list(range(n))):
                 X_color.append(self._calc_color_match_kernel_for_image(
                     X[i, :, :, :], patch_size, subsample))
             # return X_color
-        elif match_kernel == 'shape' or match_kernel == 'all':
+        if match_kernel == 'shape' or match_kernel == 'all':
             X_shape = []
             for i in tqdm(list(range(n))):
                 X_shape.append(self._calc_shape_match_kernel_for_image(
                     X[i, :, :, :], patch_size, subsample))
             # return X_shape
-        else:
-            raise Exception("Unknown match kernel")
+        # else:
+        #     raise Exception("Unknown match kernel")
 
         print(numpy.shape(X_grad), numpy.shape(X_color), numpy.shape(X_shape))
         return numpy.concatenate((X_grad, X_color, X_shape), axis=1)

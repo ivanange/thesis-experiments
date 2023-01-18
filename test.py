@@ -8,9 +8,12 @@ import numpy
 from scipy.ndimage import generic_filter
 from functools import reduce
 from describe_test import describe_test
+from describe import describe
+from experimenter import train
 
-
-describe_test('kdesa')
+# describe('sift', 'dataset_reduced.csv')
+describe('kdesa', 'test-dataset.csv')
+# train('HOG_.npy')
 
 # I = numpy.random.randint(30, size=(10, 10, 3))
 # print(I.shape)

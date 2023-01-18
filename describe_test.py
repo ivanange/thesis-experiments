@@ -93,6 +93,7 @@ def describe_test(descriptor):
             # apply image transform combination
             image = io.imread(os.path.join(
                 'dataset', row['file_path']))
+            print(image.dtype)
             image = transform.warp(image, transform.AffineTransform(
                 **transform_combination).inverse)
 
@@ -103,7 +104,9 @@ def describe_test(descriptor):
             image = exposure.adjust_gamma(image, 2)
 
             # extract features, remember max_feature_size
-            feature = descriptor(image)
+            feature = descriptor(image).astype(np.float16)
+            print(feature.dtype)
+            print(feature)
             # print(feature.shape)
             # print(feature)
             features.append(feature)
@@ -120,11 +123,12 @@ def describe_test(descriptor):
                 0, max_feature_size - len(feature)), mode='constant', constant_values=0)
 
         # convert features to numpy array
-        features_df = np.asarray(features, dtype=np.float32)
+        features_df = np.asarray(features, dtype=np.float16)
+        print(features_df.dtype)
         # print(np.shape(features))
 
         # create features dataset
-        features_df = pd.DataFrame(features)
+        features_df = pd.DataFrame(features_df)
         features_df['category'] = dataset['category']
         features_df['time'] = dataset['time']
         features_df['invalid'] = dataset['censored'] == 1
@@ -150,7 +154,7 @@ def describe_test(descriptor):
             0, max_full_feature_size - len(feature)), mode='constant', constant_values=0)
 
     # convert full_features to numpy array
-    full_features = np.asarray(full_features, dtype=np.float32)
+    full_features = np.asarray(full_features, dtype=np.float16)
 
     # create full_features dataset
     n_transform_combinations = len(transform_combinations)

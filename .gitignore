@@ -16,3 +16,6 @@ __pycache__/
 
 # *.ipynb
 keep.git
+
+# command outputs
+result_*.txt

@@ -34,7 +34,8 @@ def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=2, beta=2, random_
     '''Train a model to predict survival from the given data.'''
 
     # set random state
-    random_state = random_state
+    np.random.seed(random_state)
+    # np.random.set_state(random_state)
 
     kernels = {
         'power': lambda x: gramMatrix(x, x, lambda x1, x2: -np.linalg.norm(x1 - x2)**beta),
@@ -42,22 +43,24 @@ def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=2, beta=2, random_
         'mixture': lambda x: alpha * pairwise_kernels(x, metric='rbf', gamma=gamma) + (1-alpha)*pairwise_kernels(x, metric='poly', degree=degree),
     }
 
-    # read data from file
+    # read data from npy file
     filename = file.endswith(
-        '.csv') and file or f'{file}.csv'
-    dataset = pd.read_csv(os.path.join('features', filename))
+        '.npy') and file or f'{file}.npy'
+    dataset = np.load(os.path.join('features', filename), allow_pickle=True)
 
     # shuffle dataset
-    dataset = dataset.sample(frac=1, random_state=random_state)
+    np.random.shuffle(dataset)
 
     # extract features and labels
     y = list()
-    for index, row in dataset.iloc[:, [-1, -2]].iterrows():
-        y.append((row[-2], row[-1]))
-    y = np.array(y, dtype=[('status', bool), ('time', '<f8')])
-    # print(y)
-    x = dataset.drop(columns=dataset.iloc[:, [-3, -2, -1]])
-    x = np.array(x)
+    for indicator, time in dataset[:, [-1, -2]]:
+        y.append((indicator, time))
+    y = np.array(y, dtype=[('status', bool), ('time', '<f8')]).flatten()
+
+    # y = dataset[:, [-1, -2]]
+    print(y)
+    x = np.delete(dataset, [-3, -2, -1], axis=1).astype(np.float16)
+    # x = np.array(x)
 
     # evaluate kernel matrix
     kernel_name = kernel
