@@ -80,7 +80,7 @@ def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=2, beta=2, random_
 
     # save the model to disk
     now = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
-    filename = os.path.join('models', f'{kernel_name}_{now}_model.sav')
+    filename = os.path.join('models', f'{file}_{kernel_name}_{now}_model.sav')
     pickle.dump(model, open(filename, 'wb'))
 
     # %%
