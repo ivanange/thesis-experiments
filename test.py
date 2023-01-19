@@ -10,10 +10,20 @@ from functools import reduce
 from describe_test import describe_test
 from describe import describe
 from experimenter import train
+import pickle
+import os
 
 # describe('sift', 'dataset_reduced.csv')
-describe('kdesa', 'test-dataset.csv')
+# describe('kdesa', 'test-dataset.csv')
+# describe('hog', 'test-dataset copy.csv')
+# train('test-dataset copy.csv_HOG_augmented.npy')
 # train('HOG_.npy')
+
+model = pickle.load(open(os.path.join(
+    'models', 'test-dataset copy.csv_HOG_augmented.npy_power_19-01-2023 12-17-16_model.sav'), 'rb'))
+print(model.score)
+print(model.cv_results)
+
 
 # I = numpy.random.randint(30, size=(10, 10, 3))
 # print(I.shape)

@@ -2,11 +2,10 @@
 from mando import command, main
 import os
 import numpy as np
-import pandas as pd
+from sklearn.metrics import make_scorer
 from sklearn.metrics.pairwise import pairwise_kernels
+from sklearn.model_selection import cross_validate
 from sksurv.svm import FastKernelSurvivalSVM
-from sksurv.column import encode_categorical
-from sksurv.datasets import load_veterans_lung_cancer
 from sksurv.metrics import concordance_index_censored
 import pickle
 from datetime import datetime
@@ -29,8 +28,14 @@ def score_survival_model(model, X, y):
     return result[0]
 
 
+def custom_scoring_function(y, prediction):
+    result = concordance_index_censored(
+        y['status'], y['time'], prediction)
+    return result[0]
+
+
 @command
-def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=2, beta=2, random_state=0):
+def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=1, beta=2, random_state=0):
     '''Train a model to predict survival from the given data.'''
 
     # set random state
@@ -70,13 +75,18 @@ def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=2, beta=2, random_
 
     # setup model
     model = FastKernelSurvivalSVM(
-        kernel='precomputed', random_state=random_state)
+        kernel='precomputed', random_state=random_state, timeit=1, alpha=1, rank_ratio=1)
 
-    # train model
-    model.fit(kernel_matrix, y)
-
-    score = score_survival_model(model, kernel_matrix, y)
+    # train model with CV
+    cv_results = cross_validate(model, kernel_matrix, y, cv=4, scoring=make_scorer(
+        custom_scoring_function, greater_is_better=True), return_train_score=True,)
+    # model.fit(kernel_matrix, y)
+    score = np.mean(cv_results['test_score'])
+    model.cv_results = cv_results
+    model.score = score
+    # score = score_survival_model(model, kernel_matrix, y)
     print(f'Concordance index: {score}')
+    # print(cv_results)
 
     # save the model to disk
     now = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
