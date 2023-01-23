@@ -11,6 +11,7 @@ import pickle
 from datetime import datetime
 import describe
 import describe_test
+from sklearn.preprocessing import StandardScaler
 
 
 def gramMatrix(X1, X2, K_function):
@@ -35,7 +36,7 @@ def custom_scoring_function(y, prediction):
 
 
 @command
-def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=1, beta=2, random_state=0):
+def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=3, beta=0.8, random_state=0):
     '''Train a model to predict survival from the given data.'''
 
     # set random state
@@ -67,8 +68,11 @@ def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=1, beta=2, random_
     x = np.delete(dataset, [-3, -2, -1], axis=1).astype(np.float16)
     # x = np.array(x)
 
+    # x = StandardScaler().fit(x).transform(x)
+
     # evaluate kernel matrix
     kernel_name = kernel
+    gamma = 1/x.shape[1]
     kernel = kernels[kernel_name]
     kernel_matrix = kernel(x)
     kernel_matrix
