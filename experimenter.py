@@ -12,6 +12,7 @@ from datetime import datetime
 import describe
 import describe_test
 from sklearn.preprocessing import StandardScaler
+from joblib import dump, load
 
 
 def gramMatrix(X1, X2, K_function):
@@ -36,17 +37,16 @@ def custom_scoring_function(y, prediction):
 
 
 @command
-def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=3, beta=0.8, random_state=0):
+def train(file, kernel='power', cv=False, alpha=0.05, gamma=0.5, degree=3, beta=0.8, random_state=0):
     '''Train a model to predict survival from the given data.'''
 
     # set random state
     np.random.seed(random_state)
     # np.random.set_state(random_state)
-
     kernels = {
-        'power': lambda x: gramMatrix(x, x, lambda x1, x2: -np.linalg.norm(x1 - x2)**beta),
-        'log': lambda x:  gramMatrix(x, x, lambda x1, x2: -np.log(1 + np.linalg.norm(x1 - x2, axis=0)**beta)),
-        'mixture': lambda x: alpha * pairwise_kernels(x, metric='rbf', gamma=gamma) + (1-alpha)*pairwise_kernels(x, metric='poly', degree=degree),
+        'power': lambda x: gramMatrix(x, x, lambda x1, x2: np.clip(-np.linalg.norm(x1 - x2)**beta, 2e-100, 2e100)),
+        'log': lambda x:  gramMatrix(x, x, lambda x1, x2: np.clip(-np.log(1 + np.linalg.norm(x1 - x2, axis=0)**beta), 2e-100, 2e100)),
+        'mixture': lambda x: np.clip(alpha * pairwise_kernels(x, metric='rbf', gamma=gamma) + (1-alpha)*pairwise_kernels(x, metric='poly', degree=degree), 2e-100, 2e100),
     }
 
     # read data from npy file
@@ -68,38 +68,46 @@ def train(file, kernel='power', alpha=0.05, gamma=0.5, degree=3, beta=0.8, rando
     x = np.delete(dataset, [-3, -2, -1], axis=1).astype(np.float16)
     # x = np.array(x)
 
-    # x = StandardScaler().fit(x).transform(x)
-
     # evaluate kernel matrix
     kernel_name = kernel
     gamma = 1/x.shape[1]
     kernel = kernels[kernel_name]
     kernel_matrix = kernel(x)
+    # kernel_matrix = StandardScaler().fit(kernel_matrix).transform(kernel_matrix)
+
     kernel_matrix
 
     # setup model
     model = FastKernelSurvivalSVM(
-        kernel='precomputed', random_state=random_state, timeit=1, alpha=1, rank_ratio=1)
+        kernel='precomputed', random_state=random_state, timeit=1, alpha=1, rank_ratio=1, max_iter=100)
 
-    # train model with CV
-    cv_results = cross_validate(model, kernel_matrix, y, cv=4, scoring=make_scorer(
-        custom_scoring_function, greater_is_better=True), return_train_score=True,)
-    # model.fit(kernel_matrix, y)
-    score = np.mean(cv_results['test_score'])
-    model.cv_results = cv_results
-    model.score = score
+    if not cv:
+        model.fit(kernel_matrix, y)
+    else:
+        # train model with CV
+        cv_results = cross_validate(model, kernel_matrix, y, cv=4, scoring=make_scorer(
+            custom_scoring_function, greater_is_better=True), return_train_score=True, return_estimator=True)
+        score = np.mean(cv_results['test_score'])
+
+        # get best estimator
+        model = cv_results['estimator'][np.argmax(cv_results['test_score'])]
+        model.cv_results = cv_results
+        model.score = score
+        print(cv_results)
+
     # score = score_survival_model(model, kernel_matrix, y)
-    print(f'Concordance index: {score}')
-    # print(cv_results)
+    # print(f'Concordance index: {score}')
+    print(model.coef_)
 
     # save the model to disk
     now = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
     filename = os.path.join('models', f'{file}_{kernel_name}_{now}_model.sav')
-    pickle.dump(model, open(filename, 'wb'))
+    dump(model, open(filename, 'wb'))
 
     # %%
     # load the model from disk
-    # loaded_model = pickle.load(open(filename, 'rb'))
+    loaded_model = load(open(filename, 'rb'))
+    print(loaded_model.coef_)
 
     # %%
     # score = score_survival_model(loaded_model, kernel_matrix, y)

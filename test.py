@@ -16,7 +16,8 @@ import os
 # describe('sift', 'dataset_reduced.csv')
 # describe('kdesa', 'test-dataset.csv')
 # describe('hog', 'test-dataset copy.csv')
-train('test-dataset copy.csv_HOG_augmented.npy', 'mixture')
+# train('test-dataset copy.csv_HOG_augmented.npy', 'mixture')
+train('test-dataset copy.csv_HOG_augmented.npy', 'log', True)
 # train('HOG_.npy')
 
 # model = pickle.load(open(os.path.join(
