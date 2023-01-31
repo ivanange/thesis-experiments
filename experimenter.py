@@ -13,6 +13,8 @@ import describe
 import describe_test
 from sklearn.preprocessing import StandardScaler
 from joblib import dump, load
+from sklearnex import patch_sklearn
+patch_sklearn(global_patch=True)
 
 
 def gramMatrix(X1, X2, K_function):

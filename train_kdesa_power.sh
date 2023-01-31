@@ -33,7 +33,7 @@ cd thesis-experiments
 ## With SGI MPT use 'mpiexec_mpt -np 30 myprogram' to use mpt correctly for example
 
 # cd $SCRATCH/$PROJECT || exit 1
-python experimenter.py train dataset_reduced.csv_HOG_.npy --kernel=log 1> hog_log.out 2> hog_log.err
+python experimenter.py train dataset_reduced.csv_KDESA_.npy --kernel=power 1> kdesa_power.out 2> kdesa_power.err
 
 
 # copy some output files to submittion directory and delete temporary work files
