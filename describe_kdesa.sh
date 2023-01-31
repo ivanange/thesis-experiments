@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -q beta
 #PBS -l select=1:ncpus=4:mpiprocs=24
-#PBS -N mytestjob
+#PBS -N extact features kdesa
 #PBS -j oe
 
 ## Use multiple of 2 with a maximum of 24 on 'ncpus' parameter, one node has 24 cores max
