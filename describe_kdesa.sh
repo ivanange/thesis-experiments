@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -q gamma
 #PBS -l select=1:ncpus=12
-#PBS -N extact features kdesa
+#PBS -N describe_kdesa
 #PBS -j oe
 
 ## Use multiple of 2 with a maximum of 24 on 'ncpus' parameter, one node has 24 cores max
