@@ -37,7 +37,7 @@ python experimenter.py describe kdesa dataset_reduced.csv 1> describe_kdesa.out 
 
 
 # copy some output files to submittion directory and delete temporary work files
-cp -a models/. $PBS_O_WORKDIR/models || exit 1
+cp -a features/. $PBS_O_WORKDIR/features || exit 1
  
 #clean the temporary directory
 rm -rf "$SCRATCH/$PROJECT"/*
