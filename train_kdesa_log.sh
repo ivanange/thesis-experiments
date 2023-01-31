@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -q gamma
-#PBS -l select=1:ncpus=24:mpiprocs=24
+#PBS -l select=1:ncpus=12:mpiprocs=24
 #PBS -N train_kdesa_log
 #PBS -j oe
 
