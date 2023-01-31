@@ -1,6 +1,6 @@
 #!/bin/bash
-#PBS -q beta
-#PBS -l select=1:ncpus=4:mpiprocs=24
+#PBS -q gamma
+#PBS -l select=1:ncpus=12
 #PBS -N train_hog_power
 #PBS -j oe
 
