@@ -20,7 +20,7 @@ TARGET_SIZE = (256, 256)
 FEATURE_TARGET_SIZE = 100000
 DATASET_DIR = 'dataset'
 FEATURES_DIR = 'features'
-MAX_FEATURE_SIZE = {'KDESA': 328888, 'HOG': 328888, 'SIFT': 328888}
+MAX_FEATURE_SIZE = {'KDESA': 400000, 'HOG': 328888, 'SIFT': 328888}
 CATEGORY_TO_INT = {'invalid': 0, 'underwear': 1, 'valid': 2}
 
 # define image transforms
