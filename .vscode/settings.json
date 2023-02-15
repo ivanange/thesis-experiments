@@ -11,6 +11,7 @@
     "nchannels",
     "ndimage",
     "scipy",
+    "sklearnex",
     "sksurv",
     "tqdm"
   ]
