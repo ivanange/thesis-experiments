@@ -1,6 +1,8 @@
 import numpy as np
 from sklearn.metrics.pairwise import pairwise_kernels
 from sklearnex import patch_sklearn
+from mando import command, main
+
 patch_sklearn(global_patch=True)
 
 experiments = {
@@ -66,7 +68,10 @@ kernels = {
     'mixture': lambda x: np.clip(alpha * pairwise_kernels(x, metric='rbf', gamma=gamma) + (1-alpha)*pairwise_kernels(x, metric='poly', degree=degree), 2e-100, 2e100),
 }
 
-for (feature, data) in experiments.items():
+
+@command
+def kernel_matrices(feature):
+    data = experiments[feature]
     print(f'Feature: {feature}')
     dataset = np.load(data['dataset'])
     x = np.delete(dataset, [-3, -2, -1], axis=1).astype(np.float16)
