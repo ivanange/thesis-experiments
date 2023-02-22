@@ -10,6 +10,7 @@ from functools import reduce
 from describe_test import describe_test
 from describe import describe
 from experimenter import train
+from kernel_matrices import kernel_matrices
 import pickle
 import os
 
@@ -17,7 +18,8 @@ import os
 # describe('kdesa', 'test-dataset.csv')
 # describe('hog', 'test-dataset copy.csv')
 # train('test-dataset copy.csv_HOG_augmented.npy', 'mixture')
-train('test-dataset copy.csv_HOG_augmented.npy', 'log', True)
+# train('test-dataset copy.csv_HOG_augmented.npy', 'log', True)
+kernel_matrices('sift')
 # train('HOG_.npy')
 
 # model = pickle.load(open(os.path.join(

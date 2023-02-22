@@ -1,13 +1,15 @@
 import numpy as np
 from sklearn.metrics.pairwise import pairwise_kernels
 from sklearnex import patch_sklearn
+from sklearn.preprocessing import StandardScaler
+from joblib import dump, load
 from mando import command, main
 
 patch_sklearn(global_patch=True)
 
 experiments = {
     'sift': {
-        'dataset':  'features/dataset_reduced.csv_SIFT_.npy',
+        'dataset':  'features/test-dataset copy.csv_HOG_.npy',
         'model': {
             'log': 'models/dataset_reduced.csv_SIFT_.npy_log_01-02-2023 06-29-21_model.sav',
             'power': 'models/dataset_reduced.csv_SIFT_.npy_power_01-02-2023 07-07-27_model.sav',
@@ -63,27 +65,39 @@ def gramMatrix(X1, X2, K_function):
 
 
 kernels = {
-    'power': lambda x: gramMatrix(x, x, lambda x1, x2: np.clip(-np.linalg.norm(x1 - x2)**beta, 2e-100, 2e100)),
-    'log': lambda x:  gramMatrix(x, x, lambda x1, x2: np.clip(-np.log(1 + np.linalg.norm(x1 - x2, axis=0)**beta), 2e-100, 2e100)),
-    'mixture': lambda x: np.clip(alpha * pairwise_kernels(x, metric='rbf', gamma=gamma) + (1-alpha)*pairwise_kernels(x, metric='poly', degree=degree), 2e-100, 2e100),
+    'power': lambda x, y: gramMatrix(x, y, lambda x1, x2: np.clip(-np.linalg.norm(x1 - x2)**beta, 2e-100, 2e100)),
+    'log': lambda x, y:  gramMatrix(x, y, lambda x1, x2: np.clip(-np.log(1 + np.linalg.norm(x1 - x2, axis=0)**beta), 2e-100, 2e100)),
+    'mixture': lambda x, y: np.clip(alpha * pairwise_kernels(x, y, metric='rbf', gamma=gamma) + (1-alpha)*pairwise_kernels(x, y, metric='poly', degree=degree), 2e-100, 2e100),
 }
+
+
+def load_dataset(feature):
+    data = experiments[feature]
+    dataset = np.load(data['dataset'])
+    x = np.delete(dataset, [-3, -2, -1], axis=1)
+    # labels: 1 - invalid, 0 - valid
+    labels = dataset[:, [-3, -2, -1]]
+    return x, labels
+
+
+def predict(feature, kernel, model, x):
+    x_train, _ = load_dataset(feature)
+    kernel_matrix = kernels[kernel](x, x_train.T)
+    return model.predict(kernel_matrix)
 
 
 @command
 def kernel_matrices(feature):
-    data = experiments[feature]
-    print(f'Feature: {feature}')
-    dataset = np.load(data['dataset'])
-    x = np.delete(dataset, [-3, -2, -1], axis=1).astype(np.float16)
-    # labels: 1 - invalid, 0 - valid
-    labels = dataset[:, [-3, -2, -1]].astype(np.int8)
-
     for kernel_name in ['log', 'power', 'mixture']:
-        print(f'Kernel: {kernel_name}')
+        kernel_matrix(feature, kernel_name)
 
-        kernel = kernels[kernel_name]
-        kernel_matrix = kernel(x)
-        # save kernel matrix with labels
-        np.save(
-            f'kernel_matrices/{feature}_{kernel_name}_kernel_matrix.npy', kernel_matrix)
-        np.save(f'kernel_matrices/{feature}_{kernel_name}_labels.npy', labels)
+
+@command
+def kernel_matrix(feature, kernel_name):
+    x, labels = load_dataset(feature)
+    kernel = kernels[kernel_name]
+    kernel_matrix = kernel(x, x)
+    # save kernel matrix with labels
+    np.save(
+        f'kernel_matrices/{feature}_{kernel_name}_kernel_matrix.npy', kernel_matrix)
+    np.save(f'kernel_matrices/{feature}_{kernel_name}_labels.npy', labels)

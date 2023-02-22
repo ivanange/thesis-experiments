@@ -40,49 +40,26 @@ def custom_scoring_function(y, prediction):
 
 
 @command
-def train(file, kernel='power', cv=False, alpha=0.05, gamma=0.5, degree=3, beta=0.8, random_state=0):
+def train(feature, kernel, cv=False, rank_ratio=1, random_state=0):
     '''Train a model to predict survival from the given data.'''
 
     # set random state
     np.random.seed(random_state)
-    # np.random.set_state(random_state)
-    kernels = {
-        'power': lambda x: gramMatrix(x, x, lambda x1, x2: np.clip(-np.linalg.norm(x1 - x2)**beta, 2e-100, 2e100)),
-        'log': lambda x:  gramMatrix(x, x, lambda x1, x2: np.clip(-np.log(1 + np.linalg.norm(x1 - x2, axis=0)**beta), 2e-100, 2e100)),
-        'mixture': lambda x: np.clip(alpha * pairwise_kernels(x, metric='rbf', gamma=gamma) + (1-alpha)*pairwise_kernels(x, metric='poly', degree=degree), 2e-100, 2e100),
-    }
+    kernel_name = kernel
 
-    # read data from npy file
-    filename = file.endswith(
-        '.npy') and file or f'{file}.npy'
-    dataset = np.load(os.path.join('features', filename), allow_pickle=True)
-
-    # shuffle dataset
-    np.random.shuffle(dataset)
+    kernel_matrix = np.load(
+        f'kernel_matrices/{feature}_{kernel_name}_kernel_matrix.npy')
+    labels = np.load(f'kernel_matrices/{feature}_{kernel_name}_labels.npy')
 
     # extract features and labels
     y = list()
-    for indicator, time in dataset[:, [-1, -2]]:
+    for indicator, time in labels[:, [-1, -2]]:
         y.append((indicator, time))
     y = np.array(y, dtype=[('status', bool), ('time', '<f8')]).flatten()
 
-    # y = dataset[:, [-1, -2]]
-    print(y)
-    x = np.delete(dataset, [-3, -2, -1], axis=1).astype(np.float16)
-    # x = np.array(x)
-
-    # evaluate kernel matrix
-    kernel_name = kernel
-    gamma = 1/x.shape[1]
-    kernel = kernels[kernel_name]
-    kernel_matrix = kernel(x)
-    # kernel_matrix = StandardScaler().fit(kernel_matrix).transform(kernel_matrix)
-
-    kernel_matrix
-
     # setup model
     model = FastKernelSurvivalSVM(
-        kernel='precomputed', random_state=random_state, timeit=1, alpha=1, rank_ratio=1, max_iter=100)
+        kernel='precomputed', rank_ratio=rank_ratio, random_state=random_state, timeit=1, alpha=1, max_iter=100)
 
     if not cv:
         model.fit(kernel_matrix, y)
@@ -96,25 +73,15 @@ def train(file, kernel='power', cv=False, alpha=0.05, gamma=0.5, degree=3, beta=
         model = cv_results['estimator'][np.argmax(cv_results['test_score'])]
         model.cv_results = cv_results
         model.score = score
-        print(cv_results)
 
-    # score = score_survival_model(model, kernel_matrix, y)
-    # print(f'Concordance index: {score}')
-    print(model.coef_)
+    model.feature = feature
+    model.kernel = kernel_name
 
     # save the model to disk
     now = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
-    filename = os.path.join('models', f'{file}_{kernel_name}_{now}_model.sav')
+    filename = os.path.join(
+        'models', f'{feature}_{kernel_name}_ratio_{rank_ratio}_{now}_model.sav')
     dump(model, open(filename, 'wb'))
-
-    # %%
-    # load the model from disk
-    loaded_model = load(open(filename, 'rb'))
-    print(loaded_model.coef_)
-
-    # %%
-    # score = score_survival_model(loaded_model, kernel_matrix, y)
-    # score
 
 
 if __name__ == '__main__':
