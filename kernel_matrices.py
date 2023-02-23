@@ -9,7 +9,7 @@ patch_sklearn(global_patch=True)
 
 experiments = {
     'sift': {
-        'dataset':  'features/test-dataset copy.csv_HOG_.npy',
+        'dataset':  'features/dataset_reduced.csv_SIFT_.npy',
         'model': {
             'log': 'models/dataset_reduced.csv_SIFT_.npy_log_01-02-2023 06-29-21_model.sav',
             'power': 'models/dataset_reduced.csv_SIFT_.npy_power_01-02-2023 07-07-27_model.sav',
