@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -q beta
 #PBS -l select=1:ncpus=12
-#PBS -N train_sift_power
+#PBS -N hog_rank_mixture
 #PBS -j oe
 
 ## Use multiple of 2 with a maximum of 24 on 'ncpus' parameter, one node has 24 cores max
@@ -33,7 +33,7 @@ cd thesis-experiments
 ## With SGI MPT use 'mpiexec_mpt -np 30 myprogram' to use mpt correctly for example
 
 # cd $SCRATCH/$PROJECT || exit 1
-python experimenter.py train dataset_reduced.csv_SIFT_augmented.npy --kernel=power 1> sift_power.out 2> sift_power.err
+python experimenter.py train hog mixture --rank_ratio=1 1> hog_rank_mixture.out 2> hog_rank_mixture.err
 
 
 # copy some output files to submittion directory and delete temporary work files

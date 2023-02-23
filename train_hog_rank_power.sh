@@ -1,7 +1,7 @@
 #!/bin/bash
-#PBS -q beta
+#PBS -q gamma
 #PBS -l select=1:ncpus=12
-#PBS -N train_kdesa_power
+#PBS -N hog_rank_power
 #PBS -j oe
 
 ## Use multiple of 2 with a maximum of 24 on 'ncpus' parameter, one node has 24 cores max
@@ -33,7 +33,7 @@ cd thesis-experiments
 ## With SGI MPT use 'mpiexec_mpt -np 30 myprogram' to use mpt correctly for example
 
 # cd $SCRATCH/$PROJECT || exit 1
-python experimenter.py train dataset_reduced.csv_KDESA_augmented.npy --kernel=power 1> kdesa_power.out 2> kdesa_power.err
+python experimenter.py train hog power --rank_ratio=1 1> hog_rank_power.out 2> hog_rank_power.err
 
 
 # copy some output files to submittion directory and delete temporary work files
