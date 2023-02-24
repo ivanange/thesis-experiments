@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -q gamma
+#PBS -q beta
 #PBS -l select=1:ncpus=12
 #PBS -N hog_rank_power
 #PBS -j oe
