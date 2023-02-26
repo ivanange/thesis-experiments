@@ -73,7 +73,7 @@ kernels = {
 
 def load_dataset(feature):
     data = experiments[feature]
-    dataset = np.load(data['dataset'])
+    dataset = np.load(data['dataset']).astype(np.float64)
     x = np.delete(dataset, [-3, -2, -1], axis=1)
     # labels: 1 - invalid, 0 - valid
     labels = dataset[:, [-3, -2, -1]]
