@@ -4,13 +4,13 @@
 # from skimage.feature import match_descriptors, plot_matches, SIFT
 # from skimage.color import rgb2gray
 # from skimage import io
-import numpy
+import numpy as np
 from scipy.ndimage import generic_filter
 from functools import reduce
 from describe_test import describe_test
 from describe import describe
 from experimenter import train
-from kernel_matrices import kernel_matrices
+from kernel_matrices import kernel_matrices, load_dataset, kernels
 import pickle
 import os
 
@@ -19,7 +19,25 @@ import os
 # describe('hog', 'test-dataset copy.csv')
 # train('test-dataset copy.csv_HOG_augmented.npy', 'mixture')
 # train('test-dataset copy.csv_HOG_augmented.npy', 'log', True)
-kernel_matrices('sift')
+
+
+def kernel_matrix(feature, kernel_name):
+    x, labels = load_dataset(feature)
+    sample_indices = np.random.choice(x.shape[0], 50, replace=False)
+    sample = x[sample_indices]
+    kernel = kernels[kernel_name]
+    kernel_matrix = kernel(sample, sample)
+    # save kernel matrix with labels
+    print(kernel_matrix)
+
+
+kernel_matrix('sift', 'power')
+# feature = 'sift'
+# kernel_name = 'power'
+# kernel_matrix = np.load(
+#     f'kernel_matrices/{feature}_{kernel_name}_kernel_matrix.npy')
+# labels = np.load(f'kernel_matrices/{feature}_{kernel_name}_labels.npy')
+# print(kernel_matrix)
 # train('HOG_.npy')
 
 # model = pickle.load(open(os.path.join(

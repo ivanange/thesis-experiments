@@ -65,9 +65,9 @@ def gramMatrix(X1, X2, K_function):
 
 
 kernels = {
-    'power': lambda x, y: gramMatrix(x, y, lambda x1, x2: np.clip(-np.linalg.norm(x1 - x2)**beta, 2e-100, 2e100)),
-    'log': lambda x, y:  gramMatrix(x, y, lambda x1, x2: np.clip(-np.log(1 + np.linalg.norm(x1 - x2, axis=0)**beta), 2e-100, 2e100)),
-    'mixture': lambda x, y: np.clip(alpha * pairwise_kernels(x, y, metric='rbf', gamma=gamma) + (1-alpha)*pairwise_kernels(x, y, metric='poly', degree=degree), 2e-100, 2e100),
+    'power': lambda x, y: gramMatrix(x, y, lambda x1, x2: np.clip(-np.linalg.norm(x1 - x2)**beta, -2e100, 2e100)),
+    'log': lambda x, y:  gramMatrix(x, y, lambda x1, x2: np.clip(-np.log(1 + np.linalg.norm(x1 - x2, axis=0)**beta), -2e100, 2e100)),
+    'mixture': lambda x, y: np.clip(alpha * pairwise_kernels(x, y, metric='rbf', gamma=gamma) + (1-alpha)*pairwise_kernels(x, y, metric='poly', degree=degree), -2e100, 2e100),
 }
 
 
