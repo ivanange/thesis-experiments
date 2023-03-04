@@ -82,7 +82,7 @@ def load_dataset(feature):
 
 def predict(feature, kernel, model, x):
     x_train, _ = load_dataset(feature)
-    kernel_matrix = kernels[kernel](x, x_train.T)
+    kernel_matrix = kernels[kernel](x, x_train)
     return model.predict(kernel_matrix)
 
 
