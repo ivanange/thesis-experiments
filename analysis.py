@@ -218,6 +218,10 @@ def analyze(feature, size=0.2):
     for (kernel_name, model_path) in data['model']['rank'].items():
         print(f'Kernel: {kernel_name}')
         model = load(open(model_path, 'rb'))
+        print(model.kernel)
+        model.precomputed_kernel = kernel_name
+        model.kernel = "precomputed"
+        dump(model, open(model_path, 'wb'))
         experiment_results[feature]['times']['rank'][kernel_name] = times = predict(
             feature, kernel_name, model, X)
 
