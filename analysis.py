@@ -212,7 +212,7 @@ def analyze(feature, size=0.2, random_state=0):
     data = experiment_results[feature]
     x, labels = load_dataset(feature)
     np.random.seed(random_state)
-    np.random.set_state(random_state)
+    # np.random.set_state(random_state)
     sample_indices = np.random.choice(
         x.shape[0], int(size * x.shape[0]), False)
     X, labels_sample = (x[sample_indices, :], labels[sample_indices, :])
