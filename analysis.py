@@ -208,7 +208,7 @@ experiment_results = {
 
 
 @command
-def analyze(feature, size=0.2, random_state=0):
+def analyze(feature, size=0.2, random_state=42):
     data = experiment_results[feature]
     x, labels = load_dataset(feature)
     np.random.seed(random_state)
