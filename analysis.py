@@ -237,7 +237,7 @@ def analyze(feature, size=0.2, random_state=0):
                 time, score) if score > threshold_score else (threshold, threshold_score)
 
         experiment_results[feature]['scores']['rank'][kernel_name] = threshold_score
-        experiment_results[feature]['thresholds']['rank'][kernel_name] = threshold_score
+        experiment_results[feature]['thresholds']['rank'][kernel_name] = threshold
         prediction = times > threshold
         experiment_results[feature]['predictions']['rank'][kernel_name] = prediction
 
@@ -261,7 +261,7 @@ def analyze(feature, size=0.2, random_state=0):
                 time, score) if score > threshold_score else (threshold, threshold_score)
 
         experiment_results[feature]['scores']['reg'][kernel_name] = threshold_score
-        experiment_results[feature]['thresholds']['reg'][kernel_name] = threshold_score
+        experiment_results[feature]['thresholds']['reg'][kernel_name] = threshold
         prediction = times > threshold
         experiment_results[feature]['predictions']['reg'][kernel_name] = prediction
 
