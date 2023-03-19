@@ -216,6 +216,7 @@ def analyze(feature, size=0.2, random_state=42):
     sample_indices = np.random.choice(
         x.shape[0], int(size * x.shape[0]), False)
     X, labels_sample = (x[sample_indices, :], labels[sample_indices, :])
+    experiment_results[feature]['indices'] = sample_indices
 
     for (kernel_name, model_path) in data['model']['rank'].items():
         print(f'Kernel: {kernel_name}')
