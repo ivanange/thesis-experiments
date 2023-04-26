@@ -16,6 +16,7 @@ import describe_test
 from sklearn.preprocessing import StandardScaler
 from joblib import dump, load
 from sklearnex import patch_sklearn
+from sklearn.model_selection import KFold
 patch_sklearn(global_patch=True)
 
 
@@ -41,7 +42,7 @@ def custom_scoring_function(y, prediction):
 
 
 @command
-def train(feature, kernel, cv=False, rank_ratio=1, random_state=0):
+def train(feature, kernel, cv=4, rank_ratio=1, random_state=42):
     '''Train a model to predict survival from the given data.'''
 
     # set random state
@@ -66,17 +67,18 @@ def train(feature, kernel, cv=False, rank_ratio=1, random_state=0):
         model.fit(kernel_matrix, y)
     else:
         # train model with CV
-        cv_results = cross_validate(model, kernel_matrix, y, cv=4, scoring=make_scorer(
+        kf = KFold(cv, random_state=random_state, shuffle=True)
+        cv_results = cross_validate(model, kernel_matrix, y, cv=kf, scoring=make_scorer(
             custom_scoring_function, greater_is_better=True), return_train_score=True, return_estimator=True)
         score = np.mean(cv_results['test_score'])
 
         # get best estimator
         model = cv_results['estimator'][np.argmax(cv_results['test_score'])]
         model.cv_results = cv_results
-        model.score = score
+        # model.score = [test_index for train_index, test_index in kf.split(X)]
 
     model.feature = feature
-    model.kernel = kernel_name
+    model.precomputed_kernel = kernel_name
 
     # save the model to disk
     now = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
